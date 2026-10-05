@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Search, Rocket, Loader2, Plus } from "lucide-react";
+import Link from "next/link";
+import { Search, Rocket, Loader2, Plus, Eye } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { AddEmployeeDialog } from "@/components/add-employee-dialog";
+import { STATUS_BADGE } from "@/components/onboarding-stepper";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -25,14 +27,6 @@ type Employee = {
   department: { id: number; name: string } | null;
   manager: { id: number; name: string } | null;
   onboarding: { id: number; status: string } | null;
-};
-
-const STATUS: Record<string, { label: string; className: string }> = {
-  employee_pending: { label: "Waiting for employee", className: "bg-slate-100 text-slate-700" },
-  hr_review: { label: "HR review", className: "bg-amber-100 text-amber-800" },
-  it_setup: { label: "IT setup", className: "bg-sky-100 text-sky-800" },
-  manager_approval: { label: "Manager approval", className: "bg-violet-100 text-violet-800" },
-  completed: { label: "Completed", className: "bg-emerald-100 text-emerald-800" },
 };
 
 export default function EmployeesPage() {
@@ -152,7 +146,7 @@ export default function EmployeesPage() {
               )}
 
               {filtered.map((e) => {
-                const status = e.onboarding ? STATUS[e.onboarding.status] : null;
+                const status = e.onboarding ? STATUS_BADGE[e.onboarding.status] : null;
                 return (
                   <TableRow key={e.id}>
                     <TableCell>
@@ -161,7 +155,16 @@ export default function EmployeesPage() {
                           {e.user.name.slice(0, 2).toUpperCase()}
                         </div>
                         <div>
-                          <p className="font-medium">{e.user.name}</p>
+                          {e.onboarding ? (
+                            <Link
+                              href={`/onboardings/${e.onboarding.id}`}
+                              className="font-medium hover:underline"
+                            >
+                              {e.user.name}
+                            </Link>
+                          ) : (
+                            <p className="font-medium">{e.user.name}</p>
+                          )}
                           <p className="text-xs text-muted-foreground">
                             {e.job_title ?? e.user.email}
                           </p>
@@ -181,7 +184,15 @@ export default function EmployeesPage() {
                     </TableCell>
                     {canManage && (
                       <TableCell className="text-right">
-                        {!e.onboarding && (
+                        {e.onboarding ? (
+                          <Link
+                            href={`/onboardings/${e.onboarding.id}`}
+                            className={buttonVariants({ variant: "outline", size: "sm" })}
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            {e.onboarding.status === "hr_review" ? "Review" : "View"}
+                          </Link>
+                        ) : (
                           <Button
                             size="sm"
                             onClick={() => startOnboarding(e.id)}

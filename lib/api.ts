@@ -33,3 +33,17 @@ export async function api<T = unknown>(
 
   return data as T;
 }
+
+// يفتح ملف محمي (يحتاج توكن) في تبويب جديد
+export async function openFile(path: string) {
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(`${API_URL}${path}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+
+  if (!res.ok) throw new Error("Could not open the file");
+
+  const blob = await res.blob();
+  window.open(URL.createObjectURL(blob), "_blank");
+}
