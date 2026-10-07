@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Search, Rocket, Loader2, Plus, Eye } from "lucide-react";
+import { Search, Rocket, Loader2, Plus, Eye, Pencil } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { AddEmployeeDialog } from "@/components/add-employee-dialog";
+import { EditEmployeeDialog, type EditableEmployee } from "@/components/edit-employee-dialog";
 import { STATUS_BADGE } from "@/components/onboarding-stepper";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -20,9 +21,7 @@ import {
 } from "@/components/ui/table";
 import { api } from "@/lib/api";
 
-type Employee = {
-  id: number;
-  job_title: string | null;
+type Employee = EditableEmployee & {
   user: { id: number; name: string; email: string };
   department: { id: number; name: string } | null;
   manager: { id: number; name: string } | null;
@@ -36,6 +35,7 @@ export default function EmployeesPage() {
   const [startingId, setStartingId] = useState<number | null>(null);
   const [role, setRole] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState<Employee | null>(null);
 
   async function load() {
     try {
@@ -183,29 +183,39 @@ export default function EmployeesPage() {
                       )}
                     </TableCell>
                     {canManage && (
-                      <TableCell className="text-right">
-                        {e.onboarding ? (
-                          <Link
-                            href={`/onboardings/${e.onboarding.id}`}
-                            className={buttonVariants({ variant: "outline", size: "sm" })}
-                          >
-                            <Eye className="mr-2 h-4 w-4" />
-                            {e.onboarding.status === "hr_review" ? "Review" : "View"}
-                          </Link>
-                        ) : (
+                      <TableCell>
+                        <div className="flex items-center justify-end gap-2">
                           <Button
-                            size="sm"
-                            onClick={() => startOnboarding(e.id)}
-                            disabled={startingId === e.id}
+                            variant="ghost"
+                            size="icon"
+                            aria-label={`Edit ${e.user.name}`}
+                            onClick={() => setEditing(e)}
                           >
-                            {startingId === e.id ? (
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            ) : (
-                              <Rocket className="mr-2 h-4 w-4" />
-                            )}
-                            Start onboarding
+                            <Pencil className="h-4 w-4" />
                           </Button>
-                        )}
+                          {e.onboarding ? (
+                            <Link
+                              href={`/onboardings/${e.onboarding.id}`}
+                              className={buttonVariants({ variant: "outline", size: "sm" })}
+                            >
+                              <Eye className="mr-2 h-4 w-4" />
+                              {e.onboarding.status === "hr_review" ? "Review" : "View"}
+                            </Link>
+                          ) : (
+                            <Button
+                              size="sm"
+                              onClick={() => startOnboarding(e.id)}
+                              disabled={startingId === e.id}
+                            >
+                              {startingId === e.id ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              ) : (
+                                <Rocket className="mr-2 h-4 w-4" />
+                              )}
+                              Start onboarding
+                            </Button>
+                          )}
+                        </div>
                       </TableCell>
                     )}
                   </TableRow>
@@ -220,6 +230,12 @@ export default function EmployeesPage() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onCreated={load}
+      />
+
+      <EditEmployeeDialog
+        employee={editing}
+        onOpenChange={(open) => !open && setEditing(null)}
+        onSaved={load}
       />
     </AppShell>
   );
