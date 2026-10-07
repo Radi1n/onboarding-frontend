@@ -3,7 +3,6 @@
 Web app for an employee onboarding system. HR, IT, managers and new hires each get their own view of the same workflow, from the first day of paperwork to final approval.
 
 🔗 **Backend repository:** [onboarding-system](https://github.com/Radi1n/onboarding-system)
-🚀 **Live demo:** _coming soon_
 
 ![Sign in](docs/screenshots/login.png)
 
@@ -14,6 +13,7 @@ Web app for an employee onboarding system. HR, IT, managers and new hires each g
 - **Document review.** HR previews files, approves or rejects with a reason, and the employee sees the feedback.
 - **Notifications.** A bell with an unread counter, refreshed automatically.
 - **Audit log.** Admins can see who did what, and when.
+- **Responsive.** The navigation turns into a slide-in drawer on mobile.
 - **Polished details.** Loading skeletons, empty states, inline errors and confirmation dialogs.
 
 ## Screenshots
