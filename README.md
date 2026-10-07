@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Onboard: Frontend
 
-## Getting Started
+Web app for an employee onboarding system. HR, IT, managers and new hires each get their own view of the same workflow, from the first day of paperwork to final approval.
 
-First, run the development server:
+🔗 **Backend repository:** [onboarding-system](https://github.com/Radi1n/onboarding-system)
+🚀 **Live demo:** _coming soon_
+
+![Sign in](docs/screenshots/login.png)
+
+## Highlights
+
+- **Role-aware interface.** The sidebar, pages and actions change with the signed-in role.
+- **Clear progress.** A step tracker shows exactly where each onboarding stands.
+- **Document review.** HR previews files, approves or rejects with a reason, and the employee sees the feedback.
+- **Notifications.** A bell with an unread counter, refreshed automatically.
+- **Audit log.** Admins can see who did what, and when.
+- **Polished details.** Loading skeletons, empty states, inline errors and confirmation dialogs.
+
+## Screenshots
+
+| Dashboard | Employees |
+|---|---|
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Employees](docs/screenshots/employees.png) |
+
+| HR review | Employee view |
+|---|---|
+| ![HR review](docs/screenshots/review.png) | ![My onboarding](docs/screenshots/my-onboarding.png) |
+
+![Audit log](docs/screenshots/audit-log.png)
+
+## Tech stack
+
+Next.js 16 (App Router), React, TypeScript, Tailwind CSS v4, shadcn/ui, Lucide icons
+
+## Getting started
+
+You need the [backend API](https://github.com/Radi1n/onboarding-system) running first.
+
+```bash
+git clone https://github.com/Radi1n/onboarding-frontend.git
+cd onboarding-frontend
+npm install
+```
+
+Create a `.env.local` file:
+
+```env
+NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api
+```
+
+Then start the app:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000/login](http://localhost:3000/login). The demo accounts are listed in the backend README.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+app/                 Pages (login, dashboard, employees, onboardings/[id], ...)
+components/          App shell, notification bell, dialogs, step tracker
+components/ui/       shadcn/ui primitives
+lib/api.ts           Fetch helper that attaches the auth token
+```
 
-## Learn More
+## Notes
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The auth token is kept in `localStorage`, which is fine for a portfolio project. A production app would use `httpOnly` cookies instead.
