@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/lib/api";
 
-type Department = { id: number; name: string };
+type Option = { id: number; name: string };
 
 const EMPTY = {
   name: "",
@@ -22,8 +22,12 @@ const EMPTY = {
   password: "",
   job_title: "",
   department_id: "",
+  manager_id: "",
   start_date: "",
 };
+
+const SELECT_CLASS =
+  "h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50";
 
 export function AddEmployeeDialog({
   open,
@@ -35,7 +39,8 @@ export function AddEmployeeDialog({
   onCreated: () => void;
 }) {
   const [form, setForm] = useState(EMPTY);
-  const [departments, setDepartments] = useState<Department[]>([]);
+  const [departments, setDepartments] = useState<Option[]>([]);
+  const [managers, setManagers] = useState<Option[]>([]);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -43,9 +48,12 @@ export function AddEmployeeDialog({
     if (!open) return;
     setForm(EMPTY);
     setError("");
-    api<Department[]>("/departments")
+    api<Option[]>("/departments")
       .then(setDepartments)
       .catch(() => setDepartments([]));
+    api<Option[]>("/managers")
+      .then(setManagers)
+      .catch(() => setManagers([]));
   }, [open]);
 
   function set(field: keyof typeof EMPTY, value: string) {
@@ -64,6 +72,7 @@ export function AddEmployeeDialog({
     };
     if (form.job_title) payload.job_title = form.job_title;
     if (form.department_id) payload.department_id = Number(form.department_id);
+    if (form.manager_id) payload.manager_id = Number(form.manager_id);
     if (form.start_date) payload.start_date = form.start_date;
 
     try {
@@ -134,21 +143,40 @@ export function AddEmployeeDialog({
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="department">Department</Label>
-            <select
-              id="department"
-              value={form.department_id}
-              onChange={(e) => set("department_id", e.target.value)}
-              className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-            >
-              <option value="">No department</option>
-              {departments.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="department">Department</Label>
+              <select
+                id="department"
+                value={form.department_id}
+                onChange={(e) => set("department_id", e.target.value)}
+                className={SELECT_CLASS}
+              >
+                <option value="">No department</option>
+                {departments.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="manager">Manager</Label>
+              <select
+                id="manager"
+                value={form.manager_id}
+                onChange={(e) => set("manager_id", e.target.value)}
+                className={SELECT_CLASS}
+              >
+                <option value="">No manager</option>
+                {managers.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-2">

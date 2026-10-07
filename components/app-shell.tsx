@@ -10,8 +10,10 @@ import {
   ClipboardList,
   LogOut,
   UserCheck,
+  ScrollText,
   type LucideIcon,
 } from "lucide-react";
+import { NotificationBell } from "@/components/notification-bell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -26,6 +28,7 @@ const NAV: NavItem[] = [
   { label: "Departments", href: "/departments", icon: Building2, roles: ["admin", "hr"] },
   { label: "My Onboarding", href: "/my-onboarding", icon: UserCheck, roles: ["employee"] },
   { label: "My Tasks", href: "/tasks", icon: ClipboardList, roles: ["it", "manager"] },
+  { label: "Audit log", href: "/audit-logs", icon: ScrollText, roles: ["admin"] },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -108,6 +111,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <h2 className="text-sm font-medium text-muted-foreground md:hidden">Onboard</h2>
           <div className="hidden md:block" />
           <div className="flex items-center gap-3">
+            <NotificationBell />
             <Badge variant="secondary" className="uppercase">
               {user.role.name}
             </Badge>
