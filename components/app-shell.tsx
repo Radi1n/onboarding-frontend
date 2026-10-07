@@ -11,6 +11,8 @@ import {
   LogOut,
   UserCheck,
   ScrollText,
+  Menu,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import { NotificationBell } from "@/components/notification-bell";
@@ -31,10 +33,79 @@ const NAV: NavItem[] = [
   { label: "Audit log", href: "/audit-logs", icon: ScrollText, roles: ["admin"] },
 ];
 
+function SidebarContent({
+  items,
+  pathname,
+  user,
+  initials,
+  onNavigate,
+  onClose,
+}: {
+  items: NavItem[];
+  pathname: string;
+  user: User;
+  initials: string;
+  onNavigate?: () => void;
+  onClose?: () => void;
+}) {
+  return (
+    <>
+      <div className="flex h-16 items-center justify-between border-b px-6">
+        <div className="flex items-center gap-2">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <Users className="h-4 w-4" />
+          </div>
+          <span className="text-lg font-semibold tracking-tight">Onboard</span>
+        </div>
+        {onClose && (
+          <Button variant="ghost" size="icon" aria-label="Close menu" onClick={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+
+      <nav className="flex-1 space-y-1 p-4">
+        {items.map((item) => {
+          const active = pathname === item.href || pathname.startsWith(item.href + "/");
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={onNavigate}
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                active
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              )}
+            >
+              <item.icon className="h-4 w-4" />
+              {item.label}
+            </Link>
+          );
+        })}
+      </nav>
+
+      <div className="border-t p-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+            {initials}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium">{user.name}</p>
+            <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("user");
@@ -62,69 +133,74 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar */}
+      {/* Desktop sidebar */}
       <aside className="hidden w-64 shrink-0 flex-col border-r bg-sidebar md:flex">
-        <div className="flex h-16 items-center gap-2 border-b px-6">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Users className="h-4 w-4" />
-          </div>
-          <span className="text-lg font-semibold tracking-tight">Onboard</span>
-        </div>
-
-        <nav className="flex-1 space-y-1 p-4">
-          {items.map((item) => {
-            const active = pathname === item.href || pathname.startsWith(item.href + "/");
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                  active
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                )}
-              >
-                <item.icon className="h-4 w-4" />
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="border-t p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
-              {initials}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium">{user.name}</p>
-              <p className="truncate text-xs text-muted-foreground">{user.email}</p>
-            </div>
-          </div>
-        </div>
+        <SidebarContent items={items} pathname={pathname} user={user} initials={initials} />
       </aside>
+
+      {/* Mobile drawer */}
+      <div
+        className={cn(
+          "fixed inset-0 z-40 md:hidden",
+          menuOpen ? "pointer-events-auto" : "pointer-events-none"
+        )}
+        aria-hidden={!menuOpen}
+      >
+        <div
+          onClick={() => setMenuOpen(false)}
+          className={cn(
+            "absolute inset-0 bg-black/40 transition-opacity",
+            menuOpen ? "opacity-100" : "opacity-0"
+          )}
+        />
+        <aside
+          className={cn(
+            "absolute inset-y-0 left-0 flex w-72 max-w-[85%] flex-col bg-sidebar shadow-xl transition-transform duration-200",
+            menuOpen ? "translate-x-0" : "-translate-x-full"
+          )}
+        >
+          <SidebarContent
+            items={items}
+            pathname={pathname}
+            user={user}
+            initials={initials}
+            onNavigate={() => setMenuOpen(false)}
+            onClose={() => setMenuOpen(false)}
+          />
+        </aside>
+      </div>
 
       {/* Main */}
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-16 items-center justify-between border-b bg-card px-6">
-          <h2 className="text-sm font-medium text-muted-foreground md:hidden">Onboard</h2>
+        <header className="flex h-16 items-center justify-between border-b bg-card px-4 md:px-6">
+          <div className="flex items-center gap-2 md:hidden">
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Open menu"
+              onClick={() => setMenuOpen(true)}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+            <span className="font-semibold tracking-tight">Onboard</span>
+          </div>
           <div className="hidden md:block" />
-          <div className="flex items-center gap-3">
+
+          <div className="flex items-center gap-2 md:gap-3">
             <NotificationBell />
-            <Badge variant="secondary" className="uppercase">
+            <Badge variant="secondary" className="hidden uppercase sm:inline-flex">
               {user.role.name}
             </Badge>
             <Button variant="outline" size="sm" onClick={logout}>
-              <LogOut className="mr-2 h-4 w-4" />
-              Logout
+              <LogOut className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Logout</span>
             </Button>
           </div>
         </header>
 
-        <main className="flex-1 p-6 md:p-8">
-  <div className="mx-auto w-full max-w-[1400px]">{children}</div>
-</main>
+        <main className="flex-1 p-4 sm:p-6 md:p-8">
+          <div className="mx-auto w-full max-w-[1400px]">{children}</div>
+        </main>
       </div>
     </div>
   );
